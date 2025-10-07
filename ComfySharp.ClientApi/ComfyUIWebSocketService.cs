@@ -179,7 +179,7 @@ public class ComfyUIWebSocketService : IDisposable
         try
         {
             var webSocketMessage = JsonSerializer.Deserialize<WebSocketMessage>(message, _jsonOptions);
-            if (webSocketMessage == null) return;
+            if (webSocketMessage == null) return Task.CompletedTask;
 
             MessageReceived?.Invoke(this, webSocketMessage);
             _dispatcher.Dispatch(webSocketMessage);
