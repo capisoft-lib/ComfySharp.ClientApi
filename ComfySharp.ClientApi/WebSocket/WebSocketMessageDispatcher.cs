@@ -21,7 +21,8 @@ public class WebSocketMessageDispatcher
     public IDisposable Subscribe<T>(Action<T> handler) where T : class
     {
         var list = _subscriptions.GetOrAdd(typeof(T), _ => new List<IDisposable>());
-        var sub = new TypedSubscription<T>(handler, () => Remove(typeof(T), null));
+        // Pass the subscription into the onDispose closure so removal uses the exact instance
+        var sub = new TypedSubscription<T>(handler, s => Remove(typeof(T), s));
         lock (list)
         {
             list.Add(sub);
@@ -31,7 +32,8 @@ public class WebSocketMessageDispatcher
 
     public IDisposable SubscribeRaw(Action<WebSocketMessage> handler)
     {
-        var sub = new RawSubscription(handler, () => Remove(null, sub: null));
+        // Pass the subscription into the onDispose closure so removal uses the exact instance
+        var sub = new RawSubscription(handler, s => Remove(null, s));
         lock (_rawSubscriptions)
         {
             _rawSubscriptions.Add(sub);
@@ -47,7 +49,10 @@ public class WebSocketMessageDispatcher
             {
                 lock (list)
                 {
-                    list.RemoveAll(s => s == sub);
+                    if (sub != null)
+                    {
+                        list.RemoveAll(s => s == sub);
+                    }
                 }
             }
         }
@@ -55,7 +60,10 @@ public class WebSocketMessageDispatcher
         {
             lock (_rawSubscriptions)
             {
-                _rawSubscriptions.RemoveAll(s => s == sub);
+                if (sub != null)
+                {
+                    _rawSubscriptions.RemoveAll(s => s == sub);
+                }
             }
         }
     }
@@ -107,9 +115,9 @@ public class WebSocketMessageDispatcher
     private sealed class TypedSubscription<T> : IDisposable where T : class
     {
         public readonly Action<T> Handler;
-        private readonly Action _onDispose;
+        private readonly Action<IDisposable> _onDispose;
         private bool _disposed;
-        public TypedSubscription(Action<T> handler, Action onDispose)
+        public TypedSubscription(Action<T> handler, Action<IDisposable> onDispose)
         {
             Handler = handler;
             _onDispose = onDispose;
@@ -118,16 +126,16 @@ public class WebSocketMessageDispatcher
         {
             if (_disposed) return;
             _disposed = true;
-            _onDispose();
+            _onDispose(this);
         }
     }
 
     private sealed class RawSubscription : IDisposable
     {
         public readonly Action<WebSocketMessage> Handler;
-        private readonly Action _onDispose;
+        private readonly Action<IDisposable> _onDispose;
         private bool _disposed;
-        public RawSubscription(Action<WebSocketMessage> handler, Action onDispose)
+        public RawSubscription(Action<WebSocketMessage> handler, Action<IDisposable> onDispose)
         {
             Handler = handler;
             _onDispose = onDispose;
@@ -136,7 +144,7 @@ public class WebSocketMessageDispatcher
         {
             if (_disposed) return;
             _disposed = true;
-            _onDispose();
+            _onDispose(this);
         }
     }
 }
