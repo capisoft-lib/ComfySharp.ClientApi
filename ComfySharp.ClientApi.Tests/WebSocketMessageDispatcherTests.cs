@@ -110,8 +110,13 @@ public class WebSocketMessageDispatcherTests
             Type = "status",
             Data = new StatusMessage
             {
-                Status = "running",
-                Messages = new List<string> { "Processing..." }
+                Status = new StatusInfo
+                {
+                    ExecInfo = new ExecInfo
+                    {
+                        QueueRemaining = 1
+                    }
+                }
             }
         };
         
@@ -120,9 +125,9 @@ public class WebSocketMessageDispatcherTests
         
         // Assert
         Assert.Single(receivedMessages);
-        Assert.Equal("running", receivedMessages[0].Status);
-        Assert.Single(receivedMessages[0].Messages!);
-        Assert.Equal("Processing...", receivedMessages[0].Messages![0]);
+        Assert.NotNull(receivedMessages[0].Status);
+        Assert.NotNull(receivedMessages[0].Status!.ExecInfo);
+        Assert.Equal(1, receivedMessages[0].Status!.ExecInfo!.QueueRemaining);
         
         subscription.Dispose();
     }

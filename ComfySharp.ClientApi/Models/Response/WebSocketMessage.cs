@@ -62,20 +62,40 @@ public class ProgressMessage
 public class StatusMessage
 {
     /// <summary>
-    /// Execution status
+    /// Status information
     /// </summary>
     [JsonPropertyName("status")]
-    public string Status { get; set; } = string.Empty;
+    public StatusInfo? Status { get; set; }
 
     /// <summary>
-    /// Status messages
+    /// Session ID
     /// </summary>
-    [JsonPropertyName("messages")]
-    public List<string>? Messages { get; set; }
+    [JsonPropertyName("sid")]
+    public string? Sid { get; set; }
 
+    public bool Finished => Status?.ExecInfo?.QueueRemaining == 0;
+}
+
+/// <summary>
+/// Status information details
+/// </summary>
+public class StatusInfo
+{
     /// <summary>
-    /// Output files
+    /// Execution information
     /// </summary>
-    [JsonPropertyName("outputs")]
-    public Dictionary<string, object>? Outputs { get; set; }
+    [JsonPropertyName("exec_info")]
+    public ExecInfo? ExecInfo { get; set; }
+}
+
+/// <summary>
+/// Execution information
+/// </summary>
+public class ExecInfo
+{
+    /// <summary>
+    /// Number of items remaining in queue
+    /// </summary>
+    [JsonPropertyName("queue_remaining")]
+    public int QueueRemaining { get; set; }
 }

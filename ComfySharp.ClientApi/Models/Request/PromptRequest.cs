@@ -8,10 +8,10 @@ namespace ComfySharp.ClientApi.Models.Request;
 public class PromptRequest
 {
     /// <summary>
-    /// The workflow prompt definition containing node configurations
+    /// The workflow prompt definition as a JSON object (not a string)
     /// </summary>
     [JsonPropertyName("prompt")]
-    public Dictionary<string, object> Prompt { get; set; } = new();
+    public System.Text.Json.JsonElement Prompt { get; set; }
 
     /// <summary>
     /// Optional client identifier for tracking

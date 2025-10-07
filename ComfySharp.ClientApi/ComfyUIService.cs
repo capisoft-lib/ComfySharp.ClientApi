@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Encodings.Web;
 using ComfySharp.ClientApi.Models.Request;
 using ComfySharp.ClientApi.Models.Response;
 
@@ -25,8 +26,9 @@ public class ComfyUIService
         
         _jsonOptions = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-            WriteIndented = false
+            WriteIndented = false,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
     }
 

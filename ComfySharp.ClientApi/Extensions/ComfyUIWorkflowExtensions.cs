@@ -20,13 +20,14 @@ public static class ComfyUIWorkflowExtensions
     {
         if (workflow == null) throw new ArgumentNullException(nameof(workflow));
 
-        // The workflow already serializes to the structure ComfyUI expects; deserialize back to dict
+        // Get the raw JSON string from the workflow
         var json = workflow.ToJson();
-        var promptDict = JsonSerializer.Deserialize<Dictionary<string, object>>(json) ?? new Dictionary<string, object>();
-
+        
+        // Deserialize into a JsonElement so it is emitted as a raw JSON object (not quoted)
+        var promptElement = JsonSerializer.Deserialize<JsonElement>(json);
         return new PromptRequest
         {
-            Prompt = promptDict,
+            Prompt = promptElement,
             ClientId = clientId,
             ExtraData = extraData
         };
